@@ -201,3 +201,56 @@ def plot_city_map(place_name, latitude, longitude, box_size_km=2, poi_tags=None)
 
     except Exception as e:
         print(f"[Warning] Could not plot map: {e}")
+
+def plot_city_map_multiple(place_name, coords_df, box_size_km=2, poi_tags=None):
+    """
+    Plot OSM map centered on multiple coordinates with cameras overlaid.
+    
+    coords_df: DataFrame with 'Latitude' and 'Longitude' columns
+    """
+
+    # Compute bounding box from all coordinates
+    lat_min, lat_max = coords_df["Latitude"].min(), coords_df["Latitude"].max()
+    lon_min, lon_max = coords_df["Longitude"].min(), coords_df["Longitude"].max()
+
+    # Add margin around bounding box
+    lat_margin = box_size_km / 111
+    lon_margin = box_size_km / 111
+    north = lat_max + lat_margin
+    south = lat_min - lat_margin
+    west = lon_min - lon_margin
+    east = lon_max + lon_margin
+    bbox = (west, south, east, north)
+
+    # OSM data
+    graph = ox.graph_from_bbox(north, south, east, west)
+    area = ox.geocode_to_gdf(place_name)
+    nodes, edges = ox.graph_to_gdfs(graph)
+    buildings = ox.features_from_bbox(north, south, east, west, tags={"building": True})
+    pois = ox.features_from_bbox(north, south, east, west, poi_tags) if poi_tags else None
+
+    try:
+        fig, ax = plt.subplots(figsize=(8, 8))
+        area.plot(ax=ax, color="tan", alpha=0.5)
+        buildings.plot(ax=ax, facecolor="gray", edgecolor="gray", alpha=0.7)
+        edges.plot(ax=ax, linewidth=0.5, edgecolor="black", alpha=0.3)
+        nodes.plot(ax=ax, color="black", markersize=1, alpha=0.3)
+
+        if pois is not None:
+            pois.plot(ax=ax, color="green", markersize=5, alpha=0.8)
+
+        # Plot all cameras
+        ax.scatter(
+            coords_df["Longitude"], 
+            coords_df["Latitude"], 
+            c="red", s=40, marker="o", label="Cameras"
+        )
+
+        ax.set_xlim(west, east)
+        ax.set_ylim(south, north)
+        ax.set_title(f"{place_name} - Cameras", fontsize=14)
+        ax.legend()
+        plt.show()
+
+    except Exception as e:
+        print(f"[Warning] Could not plot map: {e}")
