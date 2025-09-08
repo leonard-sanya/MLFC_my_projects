@@ -145,21 +145,22 @@ features = [
     ("leisure", None),
     ("leisure", "park"),
     ("historic", None),
-    ("amenity", "place_of_worship"),]
+    ("amenity", "place_of_worship"),
+]
 
 
 tags = {k: True for k, _ in features} if features else {}
 
+
 def get_osm_datapoints(latitude, longitude, box_size_km=2, poi_tags=None):
 
-  
     box_width = box_size_km / 111
     box_height = box_size_km / 111
     north = latitude + box_height
     south = latitude - box_height
     west = longitude - box_width
     east = longitude + box_width
-  
+
     try:
         bbox = (west, south, east, north)
         pois = ox.features_from_bbox(bbox, tags=tags)
@@ -169,25 +170,25 @@ def get_osm_datapoints(latitude, longitude, box_size_km=2, poi_tags=None):
         print(f"[Warning] OSM query failed: {e}")
         return None
 
+
 def plot_city_map(place_name, latitude, longitude, box_size_km=2, poi_tags=None):
 
-    box_width = box_size_km / 111  
+    box_width = box_size_km / 111
     box_height = box_size_km / 111
     north = latitude + box_height
     south = latitude - box_height
     west = longitude - box_width
     east = longitude + box_width
-    bbox = (west, south, east, north)  
-
+    bbox = (west, south, east, north)
 
     graph = ox.graph_from_bbox(bbox)
     area = ox.geocode_to_gdf(place_name)
     nodes, edges = ox.graph_to_gdfs(graph)
-    buildings = ox.features_from_bbox(bbox,tags={"building": True})
+    buildings = ox.features_from_bbox(bbox, tags={"building": True})
     pois = ox.features_from_bbox(bbox, tags)
-    
+
     try:
-        fig, ax = plt.subplots(figsize=(6,6))
+        fig, ax = plt.subplots(figsize=(6, 6))
         area.plot(ax=ax, color="tan", alpha=0.5)
         buildings.plot(ax=ax, facecolor="gray", edgecolor="gray")
         edges.plot(ax=ax, linewidth=1, edgecolor="black", alpha=0.3)
@@ -200,4 +201,3 @@ def plot_city_map(place_name, latitude, longitude, box_size_km=2, poi_tags=None)
 
     except Exception as e:
         print(f"[Warning] Could not plot map: {e}")
-

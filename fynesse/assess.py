@@ -113,8 +113,6 @@ def labelled(data: Union[pd.DataFrame, Any]) -> Union[pd.DataFrame, Any]:
     raise NotImplementedError
 
 
-
-
 import osmnx as ox
 import pandas as pd
 import matplotlib.pyplot as plt
@@ -136,7 +134,8 @@ features = [
     ("leisure", None),
     ("leisure", "park"),
     ("historic", None),
-    ("amenity", "place_of_worship"),]
+    ("amenity", "place_of_worship"),
+]
 
 
 tags = {k: True for k, _ in features} if features else {}
@@ -147,6 +146,7 @@ def get_osm_features(latitude, longitude, box_size_km=2, tags=None):
     Access raw OSM features.
     """
     return get_osm_datapoints(latitude, longitude, box_size_km, tags)
+
 
 def get_feature_vector(latitude, longitude, box_size_km=2, features=None):
     """
@@ -168,11 +168,14 @@ def get_feature_vector(latitude, longitude, box_size_km=2, features=None):
         col_name = f"{key}:{value}" if value else key
         if key in pois_df.columns:
             if value:
-                feature_vec[col_name] = pois_df[key].astype(str).str.lower().eq(str(value).lower()).sum()
+                feature_vec[col_name] = (
+                    pois_df[key].astype(str).str.lower().eq(str(value).lower()).sum()
+                )
             else:
                 feature_vec[col_name] = pois_df[key].notna().sum()
 
     return feature_vec
+
 
 def build_feature_dataframe(city_dicts, features, box_size_km=1):
     results = {}
@@ -182,21 +185,20 @@ def build_feature_dataframe(city_dicts, features, box_size_km=1):
                 coords["latitude"],
                 coords["longitude"],
                 box_size_km=box_size_km,
-                features=features
+                features=features,
             )
             vec["country"] = country
             results[city] = vec
     return pd.DataFrame(results).T
 
 
-
-def visualize_feature_space(X, y, method='PCA'):
+def visualize_feature_space(X, y, method="PCA"):
     """
     Visualize feature space using PCA or t-SNE.
     """
-    if method == 'PCA':
+    if method == "PCA":
         reducer = PCA(n_components=2)
-    elif method == 'tSNE':
+    elif method == "tSNE":
         reducer = TSNE(n_components=2, random_state=42)
     else:
         raise ValueError("Method must be 'PCA' or 'tSNE'")
@@ -204,19 +206,14 @@ def visualize_feature_space(X, y, method='PCA'):
     X_reduced = reducer.fit_transform(X)
 
     # Convert labels to numeric codes
-    y_codes = pd.Series(y).astype("category").cat.codes  
+    y_codes = pd.Series(y).astype("category").cat.codes
 
     plt.figure(figsize=(8, 6))
     scatter = plt.scatter(
-        X_reduced[:, 0],
-        X_reduced[:, 1],
-        c=y_codes,
-        cmap="tab10",
-        alpha=0.7
+        X_reduced[:, 0], X_reduced[:, 1], c=y_codes, cmap="tab10", alpha=0.7
     )
     # Use proper legend with original labels
     legend_labels = pd.Series(y).astype("category").cat.categories
     plt.legend(*scatter.legend_elements(), title="Class", labels=legend_labels)
     plt.title(f"Feature Space Visualization ({method})")
     plt.show()
-

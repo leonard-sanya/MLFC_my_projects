@@ -105,23 +105,26 @@ def analyze_data(data: Union[pd.DataFrame, Any]) -> dict[str, Any]:
         print(f"Error analyzing data: {e}")
         return {"error": str(e)}
 
+
 from sklearn.linear_model import LogisticRegression
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.metrics import classification_report, confusion_matrix
 
-def train_location_classifier(X_train, y_train, model_type='logistic'):
+
+def train_location_classifier(X_train, y_train, model_type="logistic"):
     """
     Train a classifier for location prediction.
     """
-    if model_type == 'logistic':
+    if model_type == "logistic":
         model = LogisticRegression(max_iter=1000)
-    elif model_type == 'random_forest':
+    elif model_type == "random_forest":
         model = RandomForestClassifier(n_estimators=200, random_state=42)
     else:
         raise ValueError("Unsupported model type. Use 'logistic' or 'random_forest'.")
 
     model.fit(X_train, y_train)
     return model
+
 
 def evaluate_classifier(model, X_test, y_test):
     """
