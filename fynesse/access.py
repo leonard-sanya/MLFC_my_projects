@@ -203,13 +203,6 @@ def plot_city_map(place_name, latitude, longitude, box_size_km=2, poi_tags=None)
         print(f"[Warning] Could not plot map: {e}")
 
 def plot_city_map_multiple(place_name, coords_df, box_size_km=2, poi_tags=None):
-    """
-    Plot OSM map centered on multiple coordinates with cameras overlaid.
-    
-    coords_df: DataFrame with 'Latitude' and 'Longitude' columns
-    """
-
-    # Compute bounding box from all coordinates
     lat_min, lat_max = coords_df["Latitude"].min(), coords_df["Latitude"].max()
     lon_min, lon_max = coords_df["Longitude"].min(), coords_df["Longitude"].max()
 
@@ -223,11 +216,11 @@ def plot_city_map_multiple(place_name, coords_df, box_size_km=2, poi_tags=None):
     bbox = (west, south, east, north)
 
     # OSM data
-    graph = ox.graph_from_bbox(north, south, east, west)
+    graph = ox.graph_from_bbox(bbox)
     area = ox.geocode_to_gdf(place_name)
     nodes, edges = ox.graph_to_gdfs(graph)
-    buildings = ox.features_from_bbox(north, south, east, west, tags={"building": True})
-    pois = ox.features_from_bbox(north, south, east, west, poi_tags) if poi_tags else None
+    buildings = ox.features_from_bbox(bbox, tags={"building": True})
+    pois = ox.features_from_bbox(bbox, poi_tags) if poi_tags else None
 
     try:
         fig, ax = plt.subplots(figsize=(8, 8))
