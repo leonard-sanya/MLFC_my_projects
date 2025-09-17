@@ -1,7 +1,12 @@
 from typing import Any, Union
 import pandas as pd
 import logging
-
+import osmnx as ox
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+from sklearn.manifold import TSNE
+from fynesse.access import get_osm_datapoints
 from .config import *
 from . import access
 
@@ -113,13 +118,6 @@ def labelled(data: Union[pd.DataFrame, Any]) -> Union[pd.DataFrame, Any]:
     raise NotImplementedError
 
 
-import osmnx as ox
-import pandas as pd
-import matplotlib.pyplot as plt
-from sklearn.decomposition import PCA
-from sklearn.manifold import TSNE
-from fynesse.access import get_osm_datapoints
-
 features = [
     ("building", None),
     ("amenity", None),
@@ -205,16 +203,18 @@ def visualize_feature_space(X, y, method="PCA"):
 
     plt.figure(figsize=(8, 6))
     for country, color in [("Kenya", "green"), ("England", "blue")]:
-        mask = (y == country)
-        plt.scatter(X_proj[mask, 0], X_proj[mask, 1],
-                    label=country, color=color, s=100, alpha=0.7)
+        mask = y == country
+        plt.scatter(
+            X_proj[mask, 0],
+            X_proj[mask, 1],
+            label=country,
+            color=color,
+            s=100,
+            alpha=0.7,
+        )
 
     for i, city in enumerate(df.index):
-        plt.text(X_proj[i,0]+0.02, X_proj[i,1], city, fontsize=4)
-    # scatter = plt.scatter(
-    #     X_reduced[:, 0], X_reduced[:, 1], c=y_codes, cmap="tab10", alpha=0.7
-    # )
-    # Use proper legend with original labels
+        plt.text(X_proj[i, 0] + 0.02, X_proj[i, 1], city, fontsize=4)
     legend_labels = pd.Series(y).astype("category").cat.categories
     plt.legend(*scatter.legend_elements(), title="Class", labels=legend_labels)
     plt.title(f"Feature Space Visualization ({method})")
