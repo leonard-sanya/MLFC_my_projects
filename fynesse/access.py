@@ -185,10 +185,10 @@ def plot_city_map(
 
         lat_margin = box_size_km / 111
         lon_margin = box_size_km / 111
-        north = lat_max + lat_margin / 10
-        south = lat_min - lat_margin / 10
-        west = lon_min - lon_margin / 10
-        east = lon_max + lon_margin / 10
+        north = lat_max + lat_margin / 2
+        south = lat_min - lat_margin / 2
+        west = lon_min - lon_margin / 2
+        east = lon_max + lon_margin / 2
 
     elif latitude is not None and longitude is not None:
         box_width = box_size_km / 111
